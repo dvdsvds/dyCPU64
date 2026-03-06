@@ -100,4 +100,29 @@ namespace Alu {
                 break;
         }
     }
+    bool execute_cj(CJ cj, int64_t dr, int64_t sr) {
+        switch(cj) {
+            case CJ::EJDV:
+                return sr == dr;
+                break;
+            case CJ::NJDV:
+                return sr != dr;
+                break;
+            case CJ::GJDV:
+                return sr > dr;
+                break;
+            case CJ::LJDV:
+                return sr < dr;
+                break;
+            case CJ::GEJDV:
+                return sr >= dr;
+                break;
+            case CJ::LEJDV:
+                return sr <= dr;
+                break;
+            default:
+                return false;
+                break;
+        }
+    }
 }
