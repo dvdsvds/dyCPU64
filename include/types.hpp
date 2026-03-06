@@ -41,11 +41,11 @@ enum class DTR : uint8_t {
 
 // DVTDR
 enum class DVTDR : uint8_t {
-    MSET  = 0x0,
-    IDVU  = 0x1,
-    ISDV  = 0x2,
-    IDVM  = 0x3,
-    IDVS  = 0x4,
+    MSET = 0x0,
+    IDVU = 0x1,
+    ISDV = 0x2,
+    IDVM = 0x3,
+    IDVS = 0x4,
 };
 
 // JTA
