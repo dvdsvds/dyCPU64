@@ -65,18 +65,19 @@ enum class CJ : uint8_t {
 
 // MEM
 enum class MEM : uint8_t {
-    LVM   = 0x0,
-    SVM   = 0x1,
-    LVM8  = 0x2,
-    SVM8  = 0x3,
-    LVM16 = 0x4,
+    LVM8  = 0x0,
+    LVM16 = 0x1,
+    LVM32 = 0x2,
+    LVM64 = 0x3,
+    SVM8  = 0x4,
     SVM16 = 0x5,
-    LVM32 = 0x6,
-    SVM32 = 0x7,
-    LVMS  = 0x8,
+    SVM32 = 0x6,
+    SVM64 = 0x7,
 };
 
 // STR
 enum class STR : uint8_t {
     CLR = 0x0,
+    HALT = 0x1,
+    NOP = 0x2
 };

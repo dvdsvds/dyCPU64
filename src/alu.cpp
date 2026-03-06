@@ -1,74 +1,74 @@
 #include "alu.hpp"
 
 namespace Alu {
-    int64_t execute_rtr(RTR rtr, int64_t rs1, int64_t rs2) {
+    int64_t execute_rtr(RTR rtr, int64_t sr, int64_t sr2) {
         switch (rtr) {
             case RTR::ADD:
-                return rs1 + rs2;
+                return sr + sr2;
                 break;
             case RTR::SUB:
-                return rs1 - rs2;
+                return sr - sr2;
                 break;
             case RTR::MUL:
-                return rs1 * rs2;
+                return sr * sr2;
                 break;
             case RTR::DIV:
-                return rs1 / rs2;
+                return sr / sr2;
                 break;
             case RTR::AND:
-                return rs1 & rs2;
+                return sr & sr2;
                 break;
             case RTR::OR:
-                return rs1 | rs2;
+                return sr | sr2;
                 break;
             case RTR::XOR:
-                return rs1 ^ rs2;
+                return sr ^ sr2;
                 break; 
             case RTR::SLL:
-                return rs1 << rs2;
+                return sr << sr2;
                 break;
             case RTR::SRL:
-                return static_cast<uint64_t>(rs1) >> rs2;
+                return static_cast<uint64_t>(sr) >> sr2;
                 break;
             case RTR::SRA:
-                return static_cast<int64_t>(rs1) >> rs2;
+                return static_cast<int64_t>(sr) >> sr2;
                 break;
             case RTR::NOT:
-                return ~rs1;
+                return ~sr;
                 break;
             default:
                 return 0;
                 break;
         }
     }
-    int64_t execute_dtr(DTR dtr, int64_t rs1, int64_t dv) {
+    int64_t execute_dtr(DTR dtr, int64_t sr1, int64_t dv) {
         switch (dtr) {
             case DTR::ADV:
-                return rs1 + dv;
+                return sr1 + dv;
                 break;
             case DTR::SDV:
-                return rs1 - dv;
+                return sr1 - dv;
                 break;
             case DTR::MDV:
-                return rs1 * dv;
+                return sr1 * dv;
                 break;
             case DTR::DDV:
-                return rs1 / dv;
+                return sr1 / dv;
                 break;
             case DTR::ANDV:
-                return rs1 & dv;
+                return sr1 & dv;
                 break;
             case DTR::ORDV:
-                return rs1 | dv;
+                return sr1 | dv;
                 break;
             case DTR::SLDV:
-                return rs1 << dv;
+                return sr1 << dv;
                 break;
             case DTR::SRDV:
-                return static_cast<uint64_t>(rs1) >> dv;
+                return static_cast<uint64_t>(sr1) >> dv;
                 break;
             case DTR::SRADV:
-                return rs1 >> dv;
+                return sr1 >> dv;
                 break;
             default:
                 return 0;
