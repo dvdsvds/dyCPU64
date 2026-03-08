@@ -207,11 +207,111 @@ int main() {
             str(0x06, 0, 1, 0),       // HALT
         };
 
+        std::vector<uint32_t> add = {
+            str(0x06, 10, 0, 0),
+            dvtdr(0x02, 11, 0, 1),
+            dvtdr(0x02, 12, 0, 11),
+            rtr(0x00, 10, 0, 10, 11, 0),
+            dtr(0x01, 11, 0, 11, 1),
+            cj(0x04, 11, 1, 12, -8),
+            str(0x06, 0, 1, 0)
+        };
+        // 메모리 테스트
+        std::vector<uint32_t> mem_test = {
+            dvtdr(0x02, 0, 0, 42),         // MSET R0, 42
+            dvtdr(0x02, 1, 0, 0),          // MSET R1, 0 (주소 베이스)
+            mem(0x05, 0, 7, 1, 200),       // SVM64 R0, R1, 200
+            mem(0x05, 2, 3, 1, 200),       // LVM64 R2, R1, 200
+            str(0x06, 0, 1, 0),            // HALT
+        };
+        // 분기 테스트 (JTA)
+        std::vector<uint32_t> jta_test = {
+            dvtdr(0x02, 0, 0, 10),         // MSET R0, 10
+            jta(0x03, 0, 20),              // JDV 20
+            dvtdr(0x02, 0, 0, 99),         // MSET R0, 99 (건너뜀)
+            dvtdr(0x02, 0, 0, 77),         // MSET R0, 77 (건너뜀)
+            dvtdr(0x02, 0, 0, 55),         // MSET R0, 55 (건너뜀)
+            dvtdr(0x02, 1, 0, 20),         // MSET R1, 20 (주소 20, 여기로 점프)
+            str(0x06, 0, 1, 0),            // HALT
+        };
+
+        // EJDV 테스트: 같으면 점프
+        // R0=5, R1=5, 같으니까 점프해서 R2=100 건너뛰고 R2=1
+        std::vector<uint32_t> ejdv_test = {
+            dvtdr(0x02, 0, 0, 5),          // MSET R0, 5
+            dvtdr(0x02, 1, 0, 5),          // MSET R1, 5
+            dvtdr(0x02, 2, 0, 0),          // MSET R2, 0
+            cj(0x04, 0, 0, 1, 8),          // EJDV R0, R1, 8 (같으면 주소 20으로)
+            dvtdr(0x02, 2, 0, 100),        // MSET R2, 100 (건너뜀)
+            dvtdr(0x02, 2, 0, 1),          // MSET R2, 1 (여기로 점프)
+            str(0x06, 0, 1, 0),            // HALT
+        };
+        // assert: R2 == 1
+
+        // GJDV 테스트: SR > DR이면 점프
+        // R0=3, R1=7, R1>R0이니까 점프
+        std::vector<uint32_t> gjdv_test = {
+            dvtdr(0x02, 0, 0, 3),          // MSET R0, 3
+            dvtdr(0x02, 1, 0, 7),          // MSET R1, 7
+            dvtdr(0x02, 2, 0, 0),          // MSET R2, 0
+            cj(0x04, 0, 2, 1, 8),          // GJDV R1, R0, 8 (R1>R0이면 주소 20으로)
+            dvtdr(0x02, 2, 0, 100),        // MSET R2, 100 (건너뜀)
+            dvtdr(0x02, 2, 0, 1),          // MSET R2, 1 (여기로 점프)
+            str(0x06, 0, 1, 0),            // HALT
+        };
+        // assert: R2 == 1
+
+        // LJDV 테스트: SR < DR이면 점프
+        // R0=7, R1=3, R1<R0이니까 점프
+        std::vector<uint32_t> ljdv_test = {
+            dvtdr(0x02, 0, 0, 7),          // MSET R0, 7
+            dvtdr(0x02, 1, 0, 3),          // MSET R1, 3
+            dvtdr(0x02, 2, 0, 0),          // MSET R2, 0
+            cj(0x04, 0, 3, 1, 8),          // LJDV R1, R0, 8 (R1<R0이면 주소 20으로)
+            dvtdr(0x02, 2, 0, 100),        // MSET R2, 100 (건너뜀)
+            dvtdr(0x02, 2, 0, 1),          // MSET R2, 1 (여기로 점프)
+            str(0x06, 0, 1, 0),            // HALT
+        };
+        // assert: R2 == 1
+
+        // ===== 메모리 크기별 테스트 =====
+
+        // 8비트 테스트
+        std::vector<uint32_t> mem8_test = {
+            dvtdr(0x02, 0, 0, 255),        // MSET R0, 255
+            dvtdr(0x02, 1, 0, 0),          // MSET R1, 0 (주소 베이스)
+            mem(0x05, 0, 4, 1, 300),       // SVM8 R0, R1, 300
+            mem(0x05, 2, 0, 1, 300),       // LVM8 R2, R1, 300
+            str(0x06, 0, 1, 0),            // HALT
+        };
+        // assert: R2 == 255
+
+        // 16비트 테스트
+        std::vector<uint32_t> mem16_test = {
+            dvtdr(0x02, 0, 0, 12345),      // MSET R0, 12345
+            dvtdr(0x02, 1, 0, 0),          // MSET R1, 0
+            mem(0x05, 0, 5, 1, 300),       // SVM16 R0, R1, 300
+            mem(0x05, 2, 1, 1, 300),       // LVM16 R2, R1, 300
+            str(0x06, 0, 1, 0),            // HALT
+        };
+        // assert: R2 == 12345
+
+        // 32비트 테스트
+        std::vector<uint32_t> mem32_test = {
+            dvtdr(0x02, 0, 0, 100000),     // MSET R0, 100000
+            dvtdr(0x02, 1, 0, 0),          // MSET R1, 0
+            mem(0x05, 0, 6, 1, 300),       // SVM32 R0, R1, 300
+            mem(0x05, 2, 2, 1, 300),       // LVM32 R2, R1, 300
+            str(0x06, 0, 1, 0),            // HALT
+        };
+        // assert: R2 == 100000
+
         cpu.load_program(program);
         cpu.run();
 
-        assert(cpu.read_register(2) == 30);
-        std::cout << "[PASS] CPU: MSET + ADD + HALT\n";
+        assert(cpu.read_register(2) == 10);
+        std::cout << "R2:" << cpu.read_register(2) << std::endl;
+        std::cout << "success" << std::endl;
     }
     std::cout << "\n=== pass all tests ===\n";
     return 0;

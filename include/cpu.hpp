@@ -3,6 +3,7 @@
 #include "decoder.hpp"
 #include "memory.hpp"
 #include "registerFile.hpp"
+#include "pipline.hpp"
 
 #include <vector>
 
@@ -13,17 +14,24 @@ class Cpu {
         Memory memory;
         RegisterFile registerFile;
 
-        uint32_t fetched_instr;
-        Decoder::instr decoded;
-        int64_t sr_val;
-        int64_t sr2_val;
-        int64_t dr_val;
-        int64_t alu_result;
-        int64_t mem_result;
-        bool branch_taken;
-        uint64_t branch_target;
+        IFID ifid_a{}, ifid_b{};
+        IFID* ifid_cur = &ifid_a;
+        IFID* ifid_next = &ifid_b;
+
+        IDEX idex_a{}, idex_b{};
+        IDEX* idex_cur = &idex_a;
+        IDEX* idex_next = &idex_b;
+
+        EXMEM exmem_a{}, exmem_b{};
+        EXMEM* exmem_cur = &exmem_a;
+        EXMEM* exmem_next = &exmem_b;
+
+        MEMWB memwb_a{}, memwb_b{};
+        MEMWB* memwb_cur = &memwb_a;
+        MEMWB* memwb_next = &memwb_b;
 
         bool halted;
+        bool halt_detected;
 
         void fetch();
         void decode_stage();
@@ -32,10 +40,7 @@ class Cpu {
         void writeback();
 
     public:
-        Cpu(size_t mem_size) : pc(0), memory(mem_size), fetched_instr(0), 
-                            sr_val(0), sr2_val(0), dr_val(0),
-                            alu_result(0), mem_result(0),
-                            branch_taken(false), branch_target(0), halted(false) {}
+        Cpu(size_t mem_size) : pc(0), memory(mem_size), halted(false), halt_detected(false) {}
         void step();
         void run();
         void load_program(const std::vector<uint32_t>& inst);
