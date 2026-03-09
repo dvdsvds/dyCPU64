@@ -32,6 +32,7 @@ class Cpu {
 
         bool halted;
         bool halt_detected;
+        bool stalled;
 
         void fetch();
         void decode_stage();
@@ -39,8 +40,20 @@ class Cpu {
         void mem_stage();
         void writeback();
 
+        bool writes_to_dr(const Decoder::instr& d) const {
+            switch(d.ac) {
+                case ActionCode::JTA:  return false;
+                case ActionCode::CJ:   return false;
+                case ActionCode::MEM:
+                    return d.sc <= 3;
+                case ActionCode::STR:
+                    return d.sc == 0;
+                default: return true;
+            }
+        }
+
     public:
-        Cpu(size_t mem_size) : pc(0), memory(mem_size), halted(false), halt_detected(false) {}
+        Cpu(size_t mem_size) : pc(0), memory(mem_size), halted(false), halt_detected(false), stalled(false) {}
         void step();
         void run();
         void load_program(const std::vector<uint32_t>& inst);

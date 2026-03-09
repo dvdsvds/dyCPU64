@@ -15,6 +15,27 @@ void Cpu::fetch() {
 void Cpu::decode_stage() {
     if(!ifid_cur->is_valid) return;
 
+    Decoder::instr temp = decoder.decode(ifid_cur->fetched_instr);
+    if(idex_cur->is_valid && writes_to_dr(idex_cur->decoded)) {
+        bool need_stall = (idex_cur->decoded.dr == temp.sr);
+        if(temp.ac == ActionCode::RTR) {
+            need_stall = need_stall || (idex_cur->decoded.dr == temp.sr2);
+        }
+        if(temp.ac == ActionCode::CJ) {
+            need_stall = need_stall || (idex_cur->decoded.dr == temp.dr);
+        }
+        if(temp.ac == ActionCode::MEM && temp.sc >= 4) {
+            need_stall = need_stall || (idex_cur->decoded.dr == temp.dr);
+        }
+        if(need_stall) {
+            idex_next->is_valid = false;
+            *ifid_next = *ifid_cur;
+            stalled = true;
+            return;
+        }
+    }
+    stalled = false;
+
     idex_next->decoded = decoder.decode(ifid_cur->fetched_instr);
     switch(idex_next->decoded.ac) {
         case ActionCode::RTR:
@@ -44,6 +65,38 @@ void Cpu::decode_stage() {
         default:
             break;
     }
+
+    if(memwb_cur->is_valid && writes_to_dr(memwb_cur->decoded) && memwb_cur->decoded.dr == idex_next->decoded.sr) {
+        if(memwb_cur->decoded.ac == ActionCode::MEM) {
+            idex_next->sr_val = memwb_cur->mem_result;
+        } else {
+            idex_next->sr_val = memwb_cur->alu_result;
+        }
+    }
+    if(exmem_cur->is_valid && writes_to_dr(exmem_cur->decoded) && exmem_cur->decoded.dr == idex_next->decoded.sr) {
+        idex_next->sr_val = exmem_cur->alu_result;
+    }
+    if(memwb_cur->is_valid && writes_to_dr(memwb_cur->decoded) && memwb_cur->decoded.dr == idex_next->decoded.sr2) {
+        if(memwb_cur->decoded.ac == ActionCode::MEM) {
+            idex_next->sr2_val = memwb_cur->mem_result;
+        } else {
+            idex_next->sr2_val = memwb_cur->alu_result;
+        }
+    }
+    if(exmem_cur->is_valid && writes_to_dr(exmem_cur->decoded) && exmem_cur->decoded.dr == idex_next->decoded.sr2) {
+        idex_next->sr2_val = exmem_cur->alu_result;
+    }
+    if(memwb_cur->is_valid && writes_to_dr(memwb_cur->decoded) && memwb_cur->decoded.dr == idex_next->decoded.dr) {
+        if(memwb_cur->decoded.ac == ActionCode::MEM) {
+            idex_next->dr_val = memwb_cur->mem_result;
+        } else {
+            idex_next->dr_val = memwb_cur->alu_result;
+        }
+    }
+    if(exmem_cur->is_valid && writes_to_dr(exmem_cur->decoded) && exmem_cur->decoded.dr == idex_next->decoded.dr) {
+        idex_next->dr_val = exmem_cur->alu_result;
+    }
+
     idex_next->pc = ifid_cur->pc;
     idex_next->is_valid = ifid_cur->is_valid;
 }
@@ -177,9 +230,6 @@ void Cpu::writeback() {
 }
 
 void Cpu::step() {
-    static int cycle = 0;
-    std::cout << "cycle : " << cycle++ << ",   pc:" << pc << std::endl;
-    
     *ifid_next = {};
     *idex_next = {};
     *exmem_next = {};
@@ -195,7 +245,7 @@ void Cpu::step() {
         pc = exmem_next->branch_target;
         ifid_next->is_valid = false;
         idex_next->is_valid = false;
-    } else if(!halt_detected) {
+    } else if(!halt_detected && !stalled) {
         pc += 4;
     }
 

@@ -44,7 +44,7 @@ int main() {
         assert(inst.sr == 5);
         assert(inst.sr2 == 7);
         assert(inst.spare == 0);
-        std::cout << "[PASS] RTR ADD\n";
+        // std::cout << "[PASS] RTR ADD\n";
     }
 
     // ===== 2. RTR: NOT, DR=10, SC=0xA(NOT), SR1=15, SR2=0, Spare=127 =====
@@ -56,7 +56,7 @@ int main() {
         assert(inst.sr == 15);
         assert(inst.sr2 == 0);
         assert(inst.spare == 127);
-        std::cout << "[PASS] RTR NOT\n";
+        // std::cout << "[PASS] RTR NOT\n";
     }
 
     // ===== 3. DTR: ADV, DR=1, SC=0(ADV), SR=2, DV=100 (양수) =====
@@ -67,7 +67,7 @@ int main() {
         assert(inst.sc == 0);
         assert(inst.sr == 2);
         assert(inst.dv == 100);
-        std::cout << "[PASS] DTR ADV (DV positive)\n";
+        // std::cout << "[PASS] DTR ADV (DV positive)\n";
     }
 
     // ===== 4. DTR: SDV, DR=4, SC=1(SDV), SR=6, DV=-1 (음수) =====
@@ -78,7 +78,7 @@ int main() {
         assert(inst.sc == 1);
         assert(inst.sr == 6);
         assert(inst.dv == -1);
-        std::cout << "[PASS] DTR SDV (DV negative)\n";
+        // std::cout << "[PASS] DTR SDV (DV negative)\n";
     }
 
     // ===== 5. DVTDR: MSET, DR=20, SC=0(MSET), DV=12345 (양수) =====
@@ -88,7 +88,7 @@ int main() {
         assert(inst.dr == 20);
         assert(inst.sc == 0);
         assert(inst.dv == 12345);
-        std::cout << "[PASS] DVTDR MSET (DV positive)\n";
+        // std::cout << "[PASS] DVTDR MSET (DV positive)\n";
     }
 
     // ===== 6. DVTDR: ISDV, DR=8, SC=2(ISDV), DV=-500 (음수) =====
@@ -98,7 +98,7 @@ int main() {
         assert(inst.dr == 8);
         assert(inst.sc == 2);
         assert(inst.dv == -500);
-        std::cout << "[PASS] DVTDR ISDV (DV negative)\n";
+        // std::cout << "[PASS] DVTDR ISDV (DV negative)\n";
     }
 
     // ===== 7. JTA: JDV, SC=0(JDV), DV=1000 (양수) =====
@@ -107,7 +107,7 @@ int main() {
         assert(inst.ac == ActionCode::JTA);
         assert(inst.sc == 0);
         assert(inst.dv == 1000);
-        std::cout << "[PASS] JTA JDV (DV positive)\n";
+        // std::cout << "[PASS] JTA JDV (DV positive)\n";
     }
 
     // ===== 8. JTA: JDV, SC=0, DV=-100 (음수) =====
@@ -116,7 +116,7 @@ int main() {
         assert(inst.ac == ActionCode::JTA);
         assert(inst.sc == 0);
         assert(inst.dv == -100);
-        std::cout << "[PASS] JTA JDV (DV negative)\n";
+        // std::cout << "[PASS] JTA JDV (DV negative)\n";
     }
 
     // ===== 9. CJ: EJDV, DR=2, SC=0(EJDV), SR=3, DV=50 (양수) =====
@@ -127,7 +127,7 @@ int main() {
         assert(inst.sc == 0);
         assert(inst.sr == 3);
         assert(inst.dv == 50);
-        std::cout << "[PASS] CJ EJDV (DV positive)\n";
+        // std::cout << "[PASS] CJ EJDV (DV positive)\n";
     }
 
     // ===== 10. CJ: NJDV, DR=7, SC=1(NJDV), SR=9, DV=-30 (음수) =====
@@ -138,7 +138,7 @@ int main() {
         assert(inst.sc == 1);
         assert(inst.sr == 9);
         assert(inst.dv == -30);
-        std::cout << "[PASS] CJ NJDV (DV negative)\n";
+        // std::cout << "[PASS] CJ NJDV (DV negative)\n";
     }
 
     // ===== 11. MEM: LVM, DR=5, SC=0(LVM), SR=10, DV=200 (양수) =====
@@ -149,7 +149,7 @@ int main() {
         assert(inst.sc == 0);
         assert(inst.sr == 10);
         assert(inst.dv == 200);
-        std::cout << "[PASS] MEM LVM (DV positive)\n";
+        // std::cout << "[PASS] MEM LVM (DV positive)\n";
     }
 
     // ===== 12. MEM: SVM, DR=12, SC=1(SVM), SR=3, DV=-50 (음수) =====
@@ -160,7 +160,7 @@ int main() {
         assert(inst.sc == 1);
         assert(inst.sr == 3);
         assert(inst.dv == -50);
-        std::cout << "[PASS] MEM SVM (DV negative)\n";
+        // std::cout << "[PASS] MEM SVM (DV negative)\n";
     }
 
     // ===== 13. STR: CLR, DR=31, SC=0(CLR), Spare=0 =====
@@ -170,7 +170,7 @@ int main() {
         assert(inst.dr == 31);
         assert(inst.sc == 0);
         assert(inst.spare == 0);
-        std::cout << "[PASS] STR CLR\n";
+        // std::cout << "[PASS] STR CLR\n";
     }
 
     // ===== 14. STR: CLR, DR=0, SC=0, Spare=0xFFFF (최대값) =====
@@ -180,7 +180,7 @@ int main() {
         assert(inst.dr == 0);
         assert(inst.sc == 0);
         assert(inst.spare == 0xFFFF);
-        std::cout << "[PASS] STR CLR (Spare max value)\n";
+        // std::cout << "[PASS] STR CLR (Spare max value)\n";
     }
 
     // ===== 15. 잘못된 AC 예외 테스트 =====
@@ -192,7 +192,7 @@ int main() {
             caught = true;
         }
         assert(caught);
-        std::cout << "[PASS] Invalid AC exception\n";
+        // std::cout << "[PASS] Invalid AC exception\n";
     }
 
     // ===== CPU 통합 테스트 =====
@@ -306,12 +306,98 @@ int main() {
         };
         // assert: R2 == 100000
 
-        cpu.load_program(program);
+        cpu.load_program(add);
         cpu.run();
 
-        assert(cpu.read_register(2) == 10);
-        std::cout << "R2:" << cpu.read_register(2) << std::endl;
-        std::cout << "success" << std::endl;
+        {
+            Cpu cpu(1024);
+            cpu.load_program(program);
+            cpu.run();
+            assert(cpu.read_register(2) == 30);
+            std::cout << "[PASS] MSET + ADD + HALT\n";
+        }
+
+        // 1~10 합
+        {
+            Cpu cpu(1024);
+            cpu.load_program(add);
+            cpu.run();
+            assert(cpu.read_register(10) == 55);
+            std::cout << "[PASS] 1+2+...+10 = 55\n";
+        }
+
+        // 메모리 64비트
+        {
+            Cpu cpu(1024);
+            cpu.load_program(mem_test);
+            cpu.run();
+            assert(cpu.read_register(2) == 42);
+            std::cout << "[PASS] MEM64\n";
+        }
+
+        // JTA 분기
+        {
+            Cpu cpu(1024);
+            cpu.load_program(jta_test);
+            cpu.run();
+            assert(cpu.read_register(0) == 10);
+            assert(cpu.read_register(1) == 20);
+            std::cout << "[PASS] JTA\n";
+        }
+
+        // EJDV
+        {
+            Cpu cpu(1024);
+            cpu.load_program(ejdv_test);
+            cpu.run();
+            assert(cpu.read_register(2) == 1);
+            std::cout << "[PASS] EJDV\n";
+        }
+
+        // GJDV
+        {
+            Cpu cpu(1024);
+            cpu.load_program(gjdv_test);
+            cpu.run();
+            assert(cpu.read_register(2) == 1);
+            std::cout << "[PASS] GJDV\n";
+        }
+
+        // LJDV
+        {
+            Cpu cpu(1024);
+            cpu.load_program(ljdv_test);
+            cpu.run();
+            assert(cpu.read_register(2) == 1);
+            std::cout << "[PASS] LJDV\n";
+        }
+
+        // MEM 8비트
+        {
+            Cpu cpu(1024);
+            cpu.load_program(mem8_test);
+            cpu.run();
+            assert(cpu.read_register(2) == 255);
+            std::cout << "[PASS] MEM8\n";
+        }
+
+        // MEM 16비트
+        {
+            Cpu cpu(1024);
+            cpu.load_program(mem16_test);
+            cpu.run();
+            assert(cpu.read_register(2) == 12345);
+            std::cout << "[PASS] MEM16\n";
+        }
+
+        // MEM 32비트
+        {
+            Cpu cpu(1024);
+            cpu.load_program(mem32_test);
+            cpu.run();
+            assert(cpu.read_register(2) == 100000);
+            std::cout << "[PASS] MEM32\n";
+        }
     }
     std::cout << "\n=== pass all tests ===\n";
     return 0;
