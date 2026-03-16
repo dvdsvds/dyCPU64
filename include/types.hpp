@@ -9,9 +9,10 @@ enum class ActionCode : uint8_t {
     CJ    = 0x04,
     MEM   = 0x05,
     STR   = 0x06,
+    CSR   = 0x07
 };
 
-// RTR
+// RTR(0x00)
 enum class RTR : uint8_t {
     ADD = 0x0,
     SUB = 0x1,
@@ -26,7 +27,7 @@ enum class RTR : uint8_t {
     NOT = 0xA,
 };
 
-// DTR
+// DTR(0x01)
 enum class DTR : uint8_t {
     ADV   = 0x0,
     SDV   = 0x1,
@@ -39,7 +40,7 @@ enum class DTR : uint8_t {
     SRADV = 0x8,
 };
 
-// DVTDR
+// DVTDR(0x02)
 enum class DVTDR : uint8_t {
     MSET = 0x0,
     IDVU = 0x1,
@@ -48,12 +49,13 @@ enum class DVTDR : uint8_t {
     IDVS = 0x4,
 };
 
-// JTA
+// JTA(0x03)
 enum class JTA : uint8_t {
     JDV = 0x0,
+    JR  = 0x1
 };
 
-// CJ
+// CJ(0x04)
 enum class CJ : uint8_t {
     EJDV  = 0x0,
     NJDV  = 0x1,
@@ -63,7 +65,7 @@ enum class CJ : uint8_t {
     LEJDV = 0x5,
 };
 
-// MEM
+// MEM(0x05)
 enum class MEM : uint8_t {
     LVM8  = 0x0,
     LVM16 = 0x1,
@@ -75,9 +77,18 @@ enum class MEM : uint8_t {
     SVM64 = 0x7,
 };
 
-// STR
+// STR(0x06)
 enum class STR : uint8_t {
-    CLR = 0x0,
+    CLR  = 0x0,
     HALT = 0x1,
-    NOP = 0x2
+    NOP  = 0x2
+};
+
+// CSR(0x07)
+enum class CSR : uint8_t {
+    CSRR   = 0x0,
+    CSRW   = 0x1,
+    CSRRW  = 0x2,
+    CSRSDV = 0x3,
+    CSRCDV = 0x4
 };

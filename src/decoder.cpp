@@ -12,6 +12,7 @@ ActionCode Decoder::extraction_ac() {
         case ActionCode::CJ:
         case ActionCode::MEM:
         case ActionCode::STR:
+        case ActionCode::CSR:
             return ac;
         default:
             throw std::invalid_argument("Invalid ActionCode");
@@ -52,6 +53,10 @@ uint8_t Decoder::extraction_sc(ActionCode ac) {
             // 20 - 16
             return (raw_instr >> 16) & 0x1F;
             break;
+        case ActionCode::CSR:
+            // 20 - 18
+            return (raw_instr >> 18) & 0x7;
+            break;  
         default:
             throw std::invalid_argument("Invalid ActionCode in extraction_sc");
             break;
@@ -76,7 +81,14 @@ uint8_t Decoder::extraction_sr(ActionCode ac) {
             // 16 - 12
             return (raw_instr >> 12) & 0x1F;
             break;
+        case ActionCode::JTA:
+            return (raw_instr >> 19) & 0x1F;
+            break;
+        case ActionCode::CSR:
+            // 17 - 13
+            return (raw_instr >> 13) & 0x1F;
         default:
+            throw std::invalid_argument("Invalid ActionCode in extraction_sr: " + std::to_string(static_cast<int>(ac)));
             throw std::invalid_argument("Invalid ActionCode in extraction_sr");
             break;
     }
@@ -109,9 +121,9 @@ int32_t Decoder::extraction_dv(ActionCode ac) {
             break;
         }
         case ActionCode::JTA: {
-            int32_t dv = raw_instr & 0xFFFFFF;
-            if(dv & 0x800000) {
-                dv |= 0xFF000000;
+            int32_t dv = raw_instr & 0x7FFFFF;
+            if(dv & 0x40000) {
+                dv |= 0xFFF80000;
             }
             return dv;
             break;
@@ -132,6 +144,9 @@ int32_t Decoder::extraction_dv(ActionCode ac) {
             return dv;
             break;
         }
+        case ActionCode::CSR: 
+            return raw_instr & 0x1FF;
+            break;
         default:
             throw std::invalid_argument("Invalid ActionCode in extraction_dv");
             break;
@@ -146,10 +161,16 @@ uint16_t Decoder::extraction_spare(ActionCode ac) {
         case ActionCode::STR:
             return raw_instr & 0xFFFF;
             break;
+        case ActionCode::CSR:
+            return raw_instr & 0x1FF;
         default:
             throw std::invalid_argument("Invalid ActionCode in extraction_spare");
             break;
     }
+}
+
+uint8_t Decoder::extraction_ca() {
+    return (raw_instr >> 9) & 0xF;
 }
 
 Decoder::instr Decoder::decode(uint32_t instr) {
@@ -178,6 +199,7 @@ Decoder::instr Decoder::decode(uint32_t instr) {
             break;
         case ActionCode::JTA:
             inst.sc = extraction_sc(inst.ac);
+            inst.sr = extraction_sr(inst.ac);
             inst.dv = extraction_dv(inst.ac);
             break;
         case ActionCode::CJ:
@@ -197,6 +219,19 @@ Decoder::instr Decoder::decode(uint32_t instr) {
             inst.sc = extraction_sc(inst.ac);
             inst.spare = extraction_spare(inst.ac);
             break;
+        case ActionCode::CSR:
+            inst.dr = extraction_dr();
+            inst.sc = extraction_sc(inst.ac);
+            inst.sr = extraction_sr(inst.ac);
+            inst.ca = extraction_ca();
+            if(inst.sc == 0x3 || inst.sc == 0x4) {
+                inst.dv = extraction_dv(inst.ac);
+            }
+            if(inst.sc == 0x0 || inst.sc == 0x1 || inst.sc == 0x2) {
+                inst.spare = extraction_spare(inst.ac);
+            }
+            break;
+
         default:
             break;
     }

@@ -13,6 +13,8 @@ class Decoder {
         uint8_t extraction_sr2(ActionCode ac);
         int32_t extraction_dv(ActionCode ac);
         uint16_t extraction_spare(ActionCode ac);
+        uint8_t extraction_ca();
+
     public:
         struct instr {
             ActionCode ac;
@@ -22,6 +24,7 @@ class Decoder {
             uint8_t sr2;
             int32_t dv;
             uint16_t spare;
+            uint8_t ca;
         };
 
         instr decode(uint32_t instr);

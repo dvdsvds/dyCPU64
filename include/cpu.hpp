@@ -4,6 +4,7 @@
 #include "memory.hpp"
 #include "registerFile.hpp"
 #include "pipline.hpp"
+#include "csrFile.hpp"
 
 #include <vector>
 
@@ -13,6 +14,7 @@ class Cpu {
         Decoder decoder;
         Memory memory;
         RegisterFile registerFile;
+        CsrFile csrFile;
 
         IFID ifid_a{}, ifid_b{};
         IFID* ifid_cur = &ifid_a;
@@ -48,8 +50,14 @@ class Cpu {
                     return d.sc <= 3;
                 case ActionCode::STR:
                     return d.sc == 0;
+                case ActionCode::CSR:
+                    return d.sc == 0x0 || d.sc == 0x2;
                 default: return true;
             }
+        }
+
+        bool is_load(const Decoder::instr& d) {
+            return d.ac == ActionCode::MEM && d.sc <= 3;
         }
 
     public:
@@ -58,4 +66,8 @@ class Cpu {
         void run();
         void load_program(const std::vector<uint32_t>& inst);
         int64_t read_register(uint8_t addr) const { return registerFile.read(addr); }
+
+        uint64_t read_memory64(uint64_t addr) {
+            return memory.read64(addr);
+        }
 };
