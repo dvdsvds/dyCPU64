@@ -3,7 +3,9 @@
 ![CMake](https://img.shields.io/badge/CMake-064F8C?style=flat&logo=cmake&logoColor=white)
 
 Custom 64-bit CPU emulator.  
+
 32-bit fixed-length instructions, 64-bit registers. RISC-based with some x86 influences, including R0 as a general-purpose register.  
+
 Part of a bottom-up computing stack: **CPU → Compiler → OS → Networking**
 
 한국어 문서: [README KR](../README.md)

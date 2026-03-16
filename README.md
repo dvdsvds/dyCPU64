@@ -3,7 +3,9 @@
 ![CMake](https://img.shields.io/badge/CMake-064F8C?style=flat&logo=cmake&logoColor=white)
 
 커스텀 64비트 CPU 에뮬레이터. 
+
 32비트 고정 길이 명령어, 64비트 레지스터. RISC 기반이나 R0를 범용 레지스터로 사용하는 등 x86 설계 일부 차용.  
+
 바텀업 컴퓨팅 스택의 일부: **CPU → 컴파일러 → OS → 네트워킹**
 
 English documentation: [README EN](docs/README.en.md)
