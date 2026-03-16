@@ -81,7 +81,9 @@ enum class MEM : uint8_t {
 enum class STR : uint8_t {
     CLR  = 0x0,
     HALT = 0x1,
-    NOP  = 0x2
+    NOP  = 0x2,
+    SYSCALL = 0x3,
+    IRET = 0x4,
 };
 
 // CSR(0x07)
@@ -90,5 +92,5 @@ enum class CSR : uint8_t {
     CSRW   = 0x1,
     CSRRW  = 0x2,
     CSRSDV = 0x3,
-    CSRCDV = 0x4
+    CSRCDV = 0x4,
 };

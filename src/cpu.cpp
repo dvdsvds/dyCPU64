@@ -160,15 +160,34 @@ void Cpu::execute() {
                 case STR::CLR:
                     exmem_next->alu_result = 0;
                     break;
-                case STR::HALT:
+                case STR::HALT: {
+                    int64_t status = csrFile.read(static_cast<uint8_t>(CSR_ADDR::STATUS));
+                    bool mode = (status >> 2) & 1;
+                    if(!mode) {
+                        exmem_next->is_illegal = true;
+                        break;
+                    }
                     exmem_next->is_halted = true;
                     halt_detected = true;
                     break;
+                }
                 case STR::NOP:
+                    break;
+                case STR::SYSCALL:
+                    exmem_next->is_syscall = true;
+                    break;
+                case STR::IRET:
+                    exmem_next->is_iret = true;
                     break;
             }
             break;
-        case ActionCode::CSR:
+        case ActionCode::CSR: {
+            int64_t status = csrFile.read(static_cast<uint8_t>(CSR_ADDR::STATUS));
+            bool mode = (status >> 2) & 1;
+            if(!mode) {
+                exmem_next->is_illegal = true;
+                break;
+            }
             switch(static_cast<CSR>(idex_cur->decoded.sc)) {
                 case CSR::CSRR:
                     exmem_next->alu_result = csrFile.read(idex_cur->decoded.ca);
@@ -187,6 +206,8 @@ void Cpu::execute() {
                     csrFile.write(idex_cur->decoded.ca, csrFile.read(idex_cur->decoded.ca) & ~idex_cur->decoded.dv);
                     break;
             }
+            break;
+        }
         default:
             break;
     }
@@ -305,7 +326,106 @@ void Cpu::step() {
     } else if(!halt_detected && !stalled) {
         pc += 4;
     }
+
+    if(exmem_cur->is_syscall) {
+        int64_t status = csrFile.read(static_cast<uint8_t>(CSR_ADDR::STATUS));
+        int64_t ie = (status >> 0) & 1;
+        status &= ~(1LL << 1);
+        status |= (ie << 1);
+        status &= ~1LL;
+        int64_t mode = (status >> 2) & 1;
+        status &= ~(1LL << 3);
+        status |= (mode << 3);
+        status |= (1LL << 2);
+        
+        csrFile.write(static_cast<uint8_t>(CSR_ADDR::STATUS), status);
+        csrFile.write(static_cast<uint8_t>(CSR_ADDR::CAUSE), 0);
+        csrFile.write(static_cast<uint8_t>(CSR_ADDR::EPC), exmem_cur->pc + 4);
+        int64_t tvec = csrFile.read(static_cast<uint8_t>(CSR_ADDR::TVEC));
+
+        pc = tvec;
+
+        ifid_next->is_valid = false;
+        idex_next->is_valid = false;
+        exmem_next->is_valid = false;
+    } 
+
+    if(exmem_cur->is_iret) {
+        int64_t status = csrFile.read(static_cast<uint8_t>(CSR_ADDR::STATUS));
+        int64_t pie = (status >> 1) & 1;
+        status &= ~(1LL << 0);
+        status |= (pie << 0);
+        int64_t pmode = (status >> 3) & 1;
+        status &= ~(1LL << 2);
+        status |= (pmode << 2);
+
+        csrFile.write(static_cast<uint8_t>(CSR_ADDR::STATUS), status);
+        int64_t epc = csrFile.read(static_cast<uint8_t>(CSR_ADDR::EPC));
+
+        pc = epc;
+
+        ifid_next->is_valid = false;
+        idex_next->is_valid = false;
+        exmem_next->is_valid = false;
+    }
+
+
     csrFile.tick_timer();
+    int64_t timer_cnt = csrFile.read(static_cast<uint8_t>(CSR_ADDR::TIMER_CNT));
+    int64_t timer_cmp = csrFile.read(static_cast<uint8_t>(CSR_ADDR::TIMER_CMP));
+    if(timer_cnt >= timer_cmp && timer_cmp > 0) {
+        int64_t ip = csrFile.read(static_cast<uint8_t>(CSR_ADDR::IP));
+        ip |= (1LL << 1);
+        csrFile.write(static_cast<uint8_t>(CSR_ADDR::IP), ip);
+
+        int64_t status = csrFile.read(static_cast<uint8_t>(CSR_ADDR::STATUS));
+        int64_t ie = csrFile.read(static_cast<uint8_t>(CSR_ADDR::IE));
+        if(((status >> 0) & 1) && ((ie >> 1) & 1)) {
+            int64_t status_ie = (status >> 0) & 1;
+            status &= ~(1LL << 1);
+            status |= (status_ie << 1);
+            status &= ~1LL;
+            int64_t mode = (status >> 2) & 1;
+            status &= ~(1LL << 3);
+            status |= (mode << 3);
+            status |= (1LL << 2);
+
+            csrFile.write(static_cast<uint8_t>(CSR_ADDR::STATUS), status);
+            csrFile.write(static_cast<uint8_t>(CSR_ADDR::CAUSE), 1);
+            csrFile.write(static_cast<uint8_t>(CSR_ADDR::EPC), exmem_cur->pc);
+            int64_t tvec = csrFile.read(static_cast<uint8_t>(CSR_ADDR::TVEC));
+
+            pc = tvec;
+
+            ifid_next->is_valid = false;
+            idex_next->is_valid = false;
+            exmem_next->is_valid = false;
+        }
+    }
+
+    if(exmem_cur->is_illegal) {
+        int64_t status = csrFile.read(static_cast<uint8_t>(CSR_ADDR::STATUS));
+        int64_t ie = (status >> 0) & 1;
+        status &= ~(1LL << 1);
+        status |= (ie << 1);
+        status &= ~1LL;
+        int64_t mode = (status >> 2) & 1;
+        status &= ~(1LL << 3);
+        status |= (mode << 3);
+        status |= (1LL << 2);
+        
+        csrFile.write(static_cast<uint8_t>(CSR_ADDR::STATUS), status);
+        csrFile.write(static_cast<uint8_t>(CSR_ADDR::CAUSE), 3);
+        csrFile.write(static_cast<uint8_t>(CSR_ADDR::EPC), exmem_cur->pc);
+        int64_t tvec = csrFile.read(static_cast<uint8_t>(CSR_ADDR::TVEC));
+
+        pc = tvec;
+
+        ifid_next->is_valid = false;
+        idex_next->is_valid = false;
+        exmem_next->is_valid = false;
+    } 
+
     std::swap(ifid_cur, ifid_next);
     std::swap(idex_cur, idex_next);
     std::swap(exmem_cur, exmem_next);

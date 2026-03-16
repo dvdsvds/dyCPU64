@@ -25,6 +25,10 @@ struct EXMEM {
     uint64_t pc;
     bool is_valid;
     bool is_halted;
+
+    bool is_syscall;
+    bool is_iret;
+    bool is_illegal;
 };
 
 struct MEMWB {

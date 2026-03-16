@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include <cstdint>
+#include <iostream>
 
 enum class CSR_ADDR {
     STATUS    = 0,
@@ -12,7 +13,7 @@ enum class CSR_ADDR {
     SCRATCH   = 6,
     TIMER_CNT = 7,
     TIMER_CMP = 8,
-    MARTID    = 9
+    HARTID    = 9
 };
 
 class CsrFile {

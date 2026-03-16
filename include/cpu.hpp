@@ -60,6 +60,7 @@ class Cpu {
             return d.ac == ActionCode::MEM && d.sc <= 3;
         }
 
+
     public:
         Cpu(size_t mem_size) : pc(0), memory(mem_size), halted(false), halt_detected(false), stalled(false) {}
         void step();
@@ -70,4 +71,7 @@ class Cpu {
         uint64_t read_memory64(uint64_t addr) {
             return memory.read64(addr);
         }
+
+        void write_csr(uint8_t addr, int64_t value) { csrFile.write(addr, value); }
+        int64_t read_csr(uint8_t addr) { return csrFile.read(addr); }
 };

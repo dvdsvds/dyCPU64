@@ -598,6 +598,66 @@ int main() {
         assert(cpu.read_register(7) == 100);  // CSRRW 후 SCRATCH = 100
         std::cout << "[PASS] CSR read/write/set/clear\n";
     }
+
+    {
+        std::vector<uint32_t> prog = {
+            dvtdr(0x02, 1, 0, 42),   // 0:  MSET R1, 42
+            str(0x06, 0, 3, 0),      // 4:  SYSCALL
+            dvtdr(0x02, 3, 0, 77),   // 8:  MSET R3, 77 (IRET 후 실행돼야 함)
+            str(0x06, 0, 1, 0),      // 12: HALT
+            dvtdr(0x02, 2, 0, 99),   // 16: MSET R2, 99
+            str(0x06, 0, 4, 0),      // 20: IRET
+        };
+        Cpu cpu(1024);
+        cpu.load_program(prog);
+        cpu.write_csr(static_cast<uint8_t>(CSR_ADDR::STATUS), 5);
+        cpu.write_csr(static_cast<uint8_t>(CSR_ADDR::TVEC), 16);
+        cpu.run();
+        assert(cpu.read_register(1) == 42);  // SYSCALL 전 실행
+        assert(cpu.read_register(2) == 99);  // 핸들러 실행
+        assert(cpu.read_register(3) == 77);  // IRET 후 복귀
+        std::cout << "[PASS] SYSCALL + IRET\n";
+    }
+
+    {
+        std::vector<uint32_t> prog = {
+            str(0x06, 0, 2, 0),      // 0:  NOP
+            str(0x06, 0, 2, 0),      // 4:  NOP
+            str(0x06, 0, 2, 0),      // 8:  NOP
+            str(0x06, 0, 2, 0),      // 12: NOP
+            str(0x06, 0, 2, 0),      // 16: NOP
+            str(0x06, 0, 1, 0),      // 20: HALT
+            dvtdr(0x02, 1, 0, 55),        // 24: MSET R1, 55
+            dvtdr(0x02, 2, 0, 0),         // 28: MSET R2, 0
+            csr(0x07, 0, 1, 2, 8, 0),     // 32: CSRW TIMER_CNT=0
+            str(0x06, 0, 4, 0),           // 36: IRET
+        };
+        Cpu cpu(1024);
+        cpu.load_program(prog);
+        cpu.write_csr(static_cast<uint8_t>(CSR_ADDR::STATUS), 5);
+        cpu.write_csr(static_cast<uint8_t>(CSR_ADDR::IE), 2);
+        cpu.write_csr(static_cast<uint8_t>(CSR_ADDR::TIMER_CMP), 3);
+        cpu.write_csr(static_cast<uint8_t>(CSR_ADDR::TVEC), 24);
+        cpu.run();
+        assert(cpu.read_register(1) == 55);
+        std::cout << "[PASS] Timer Interrupt\n";
+    }
+
+    {
+        std::vector<uint32_t> prog = {
+            str(0x06, 0, 1, 0),      // 0: HALT (User 모드에서 시도)
+            dvtdr(0x02, 1, 0, 77),   // 4: MSET R1, 77
+            str(0x06, 0, 1, 0),      // 8: HALT (Kernel 모드라 정상 종료)
+        };
+        Cpu cpu(1024);
+        cpu.load_program(prog);
+        cpu.write_csr(static_cast<uint8_t>(CSR_ADDR::STATUS), 1);
+        cpu.write_csr(static_cast<uint8_t>(CSR_ADDR::TVEC), 4);
+        cpu.run();
+        assert(cpu.read_register(1) == 77);
+        assert(cpu.read_csr(static_cast<uint8_t>(CSR_ADDR::CAUSE)) == 3);
+        std::cout << "[PASS] Privilege Check\n";
+    }
     std::cout << "\n=== pass all tests ===\n";
     return 0;
 }
