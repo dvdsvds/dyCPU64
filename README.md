@@ -1,4 +1,6 @@
 # dyCPU
+![C++](https://img.shields.io/badge/C++-00599C?style=flat&logo=cplusplus&logoColor=white)
+![CMake](https://img.shields.io/badge/CMake-064F8C?style=flat&logo=cmake&logoColor=white)
 
 커스텀 32비트 RISC CPU 에뮬레이터. C++로 처음부터 직접 구현.  
 바텀업 컴퓨팅 스택의 일부: **CPU → 컴파일러 → OS → 네트워킹**

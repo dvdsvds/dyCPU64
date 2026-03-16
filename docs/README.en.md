@@ -1,4 +1,6 @@
 # dyCPU
+![C++](https://img.shields.io/badge/C++-00599C?style=flat&logo=cplusplus&logoColor=white)
+![CMake](https://img.shields.io/badge/CMake-064F8C?style=flat&logo=cmake&logoColor=white)
 
 A custom 32-bit RISC CPU emulator with a 5-stage pipeline, written from scratch in C++.  
 Part of a bottom-up computing stack: **CPU → Compiler → OS → Networking**
