@@ -2,7 +2,8 @@
 ![C++](https://img.shields.io/badge/C++-00599C?style=flat&logo=cplusplus&logoColor=white)
 ![CMake](https://img.shields.io/badge/CMake-064F8C?style=flat&logo=cmake&logoColor=white)
 
-커스텀 32비트 RISC CPU 에뮬레이터. C++로 처음부터 직접 구현.  
+커스텀 64비트 CPU 에뮬레이터. 
+32비트 고정 길이 명령어, 64비트 레지스터. RISC 기반이나 R0를 범용 레지스터로 사용하는 등 x86 설계 일부 차용.  
 바텀업 컴퓨팅 스택의 일부: **CPU → 컴파일러 → OS → 네트워킹**
 
 English documentation: [README EN](docs/README.en.md)
@@ -29,6 +30,14 @@ dyCPU/
 ├── main.cpp             — 테스트 코드
 └── CMakeLists.txt
 ```
+
+---
+
+## 레지스터
+
+- 범용 레지스터 32개 (R0~R31), 전부 64비트
+- R0는 하드와이어드 제로가 아닌 범용 레지스터로 사용 (x86 설계 차용)
+- CSR 레지스터 16개 (64비트)
 
 ---
 
@@ -92,6 +101,20 @@ dyCPU/
 
 ## 인터럽트 시스템
 
+### CAUSE 코드
+
+| 코드 | 원인 |
+|------|------|
+| 0 | 소프트웨어 인터럽트 (SYSCALL) |
+| 1 | 타이머 인터럽트 |
+| 2 | 외부 인터럽트 |
+| 3 | 잘못된 명령어 / 권한 위반 |
+| 4 | TRAP (미구현) |
+
+### 인터럽트 우선순위
+
+예외 (TRAP, 잘못된 명령어) > 타이머 > 외부 > 소프트웨어
+
 ### 지원하는 인터럽트/예외
 - **SYSCALL** (CAUSE=0): 소프트웨어 인터럽트
 - **타이머** (CAUSE=1): TIMER_CNT >= TIMER_CMP 시 발생
@@ -123,6 +146,12 @@ cmake -S . -B build
 cmake --build build
 ./build/dyCPU
 ```
+
+---
+
+## 라이선스
+
+[MIT License](LICENSE)
 
 ---
 

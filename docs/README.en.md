@@ -2,10 +2,11 @@
 ![C++](https://img.shields.io/badge/C++-00599C?style=flat&logo=cplusplus&logoColor=white)
 ![CMake](https://img.shields.io/badge/CMake-064F8C?style=flat&logo=cmake&logoColor=white)
 
-A custom 32-bit RISC CPU emulator with a 5-stage pipeline, written from scratch in C++.  
+Custom 64-bit CPU emulator.  
+32-bit fixed-length instructions, 64-bit registers. RISC-based with some x86 influences, including R0 as a general-purpose register.  
 Part of a bottom-up computing stack: **CPU → Compiler → OS → Networking**
 
-Korean documentation: [README](../README.md)
+한국어 문서: [README KR](../README.md)
 
 ---
 
@@ -29,6 +30,14 @@ dyCPU/
 ├── main.cpp             — Test code
 └── CMakeLists.txt
 ```
+
+---
+
+## Registers
+
+- 32 general-purpose registers (R0~R31), all 64-bit
+- R0 is a general-purpose register, not hardwired zero (x86 influence)
+- 16 CSR registers (64-bit)
 
 ---
 
@@ -92,6 +101,20 @@ dyCPU/
 
 ## Interrupt System
 
+### CAUSE Codes
+
+| Code | Cause |
+|------|-------|
+| 0 | Software interrupt (SYSCALL) |
+| 1 | Timer interrupt |
+| 2 | External interrupt |
+| 3 | Illegal instruction / Privilege violation |
+| 4 | TRAP (not yet implemented) |
+
+### Interrupt Priority
+
+Exception (TRAP, Illegal) > Timer > External > Software
+
 ### Supported Interrupts / Exceptions
 - **SYSCALL** (CAUSE=0): Software interrupt
 - **Timer** (CAUSE=1): Fired when TIMER_CNT >= TIMER_CMP
@@ -123,6 +146,12 @@ cmake -S . -B build
 cmake --build build
 ./build/dyCPU
 ```
+
+---
+
+## License
+
+[MIT License](../LICENSE)
 
 ---
 
